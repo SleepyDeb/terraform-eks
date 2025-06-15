@@ -20,7 +20,7 @@ on:
 
 jobs:
   terraform:
-    name: 'Terraform Apply'
+    name: 'Terraform Plan & Apply'
     runs-on: ubuntu-latest
 
     # Conditional environment selection based on the branch or manual input
