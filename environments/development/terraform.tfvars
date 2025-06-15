@@ -12,6 +12,6 @@ node_group_min_capacity = 1
 node_group_max_capacity = 3
 node_group_desired_capacity = 1
 tags = {
-    environment = "production"
+    environment = "development"
     stack = "Sample EKS Stack"
 }
