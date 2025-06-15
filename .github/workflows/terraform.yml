@@ -1,0 +1,76 @@
+name: 'Terraform Infrastructure Deployment'
+
+on:
+  push:
+    branches:
+      - development # Trigger for development environment
+      - production  # Trigger for production environment
+
+  # This allows you to manually trigger the workflow and choose an environment
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - production
+
+jobs:
+  terraform:
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+
+    # Conditional environment selection based on the branch or manual input
+    environment:
+      # If triggered by a push to 'production' branch, use the 'production' environment
+      # Else if triggered by a push to 'development' branch, use the 'development' environment
+      # Else if manually triggered via workflow_dispatch, use the selected input environment
+      ${{ github.ref == 'refs/heads/production' && 'production' ||
+         (github.ref == 'refs/heads/development' && 'development') ||
+         (github.event_name == 'workflow_dispatch' && github.event.inputs.environment) }}
+
+    # Only run the job if a valid environment is determined
+    # This prevents running if an unexpected branch triggers it without a defined environment
+    if: github.ref == 'refs/heads.production' || github.ref == 'refs/heads.development' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.2
+
+      # Initialize Terraform based on the environment
+      - name: Terraform Init
+        id: init
+        run: terraform init -f environments/${{ github.event.inputs.environment }}/backend.hcl
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Validate Terraform configuration
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      # Plan Terraform changes for review
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -var-file=environments/${{ github.event.inputs.environment }}/terraform.tfvars -out=tfplan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Apply Terraform changes
+      # This step should only run if the plan was successful and is explicitly for deployment
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve tfplan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
