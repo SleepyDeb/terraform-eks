@@ -48,7 +48,7 @@ jobs:
       # Initialize Terraform based on the environment
       - name: Terraform Init
         id: init
-        run: terraform init -backend-config=environments/${{ github.event.inputs.environment }}/backend.hcl
+        run: terraform init -backend-config=environments/${{ env.ENV_NAME }}/backend.hcl
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -61,7 +61,7 @@ jobs:
       # Plan Terraform changes for review
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file=environments/${{ github.event.inputs.environment }}/terraform.tfvars -out=tfplan
+        run: terraform plan -var-file=environments/${{ env.ENV_NAME }}/terraform.tfvars -out=tfplan
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
