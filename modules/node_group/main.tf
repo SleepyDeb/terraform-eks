@@ -28,6 +28,10 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
   role       = aws_iam_role.node_group.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
+resource "aws_iam_role_policy_attachment" "AmazonSSMManagedInstanceCore" {
+  role       = aws_iam_role.node_ group.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
 
 resource "aws_eks_node_group" "this" {
   cluster_name    = var.cluster_name
