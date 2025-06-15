@@ -48,7 +48,7 @@ jobs:
       # Initialize Terraform based on the environment
       - name: Terraform Init
         id: init
-        run: terraform init -f environments/${{ github.event.inputs.environment }}/backend.hcl
+        run: terraform init -backend-config=environments/${{ github.event.inputs.environment }}/backend.hcl
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
