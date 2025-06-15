@@ -1,10 +1,7 @@
 terraform {
   required_version = ">= 1.3.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
+  backend "s3" {
+
   }
 }
 
@@ -41,13 +38,4 @@ module "node_group" {
   min_capacity       = var.node_group_min_capacity
   max_capacity       = var.node_group_max_capacity
   tags               = var.tags
-}
-
-output "cluster_endpoint" {
-  value = module.eks.cluster_endpoint
-}
-
-output "kubeconfig" {
-  value = module.eks.kubeconfig
-  sensitive = true
 }

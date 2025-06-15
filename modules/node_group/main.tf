@@ -44,11 +44,3 @@ resource "aws_eks_node_group" "this" {
   instance_types = var.instance_types
   tags           = var.tags
 }
-
-output "node_group_arn" {
-  value = aws_eks_node_group.this.arn
-}
-
-output "node_group_role_arn" {
-  value = aws_iam_role.node_group.arn
-}

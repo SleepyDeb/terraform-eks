@@ -3,12 +3,6 @@ output "cluster_endpoint" {
   value       = module.eks.cluster_endpoint
 }
 
-output "kubeconfig" {
-  description = "Kubeconfig file content for the EKS cluster"
-  value       = module.eks.kubeconfig
-  sensitive   = true
-}
-
 output "vpc_id" {
   description = "VPC ID"
   value       = module.vpc.vpc_id

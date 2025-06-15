@@ -23,23 +23,17 @@ resource "aws_eks_cluster" "this" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
 
+  access_config {
+    authentication_mode = "API"
+  }
+
   vpc_config {
+    endpoint_private_access = true
+    endpoint_public_access  = false
+
     subnet_ids = var.subnet_ids
   }
 
   version = var.cluster_version
   tags    = var.tags
-}
-
-output "cluster_name" {
-  value = aws_eks_cluster.this.name
-}
-
-output "cluster_endpoint" {
-  value = aws_eks_cluster.this.endpoint
-}
-
-output "kubeconfig" {
-  value = aws_eks_cluster.this.kubeconfig[0]
-  sensitive = true
 }

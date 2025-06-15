@@ -1,3 +1,15 @@
+variable "backend_bucket" {
+  description = "AWS terraform backend bucket"
+  type        = string
+  default     = "terraform-backend-846173919647-eu-west-1"
+}
+
+variable "backend_key" {
+  description = "AWS terraform backend object key"
+  type        = string
+  default     = "terraform-eks"
+}
+
 variable "region" {
   description = "AWS region to deploy resources in"
   type        = string
@@ -55,7 +67,7 @@ variable "node_group_name" {
 variable "node_group_instance_types" {
   description = "List of EC2 instance types for the node group"
   type        = list(string)
-  default     = ["t3.medium"]
+  default     = ["t3.small"]
 }
 
 variable "node_group_desired_capacity" {
@@ -79,5 +91,7 @@ variable "node_group_max_capacity" {
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
-  default     = {}
+  default     = {
+        Architecture = "Sample Architecture"
+  }
 }

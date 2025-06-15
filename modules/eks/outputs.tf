@@ -8,11 +8,6 @@ output "cluster_endpoint" {
   value       = aws_eks_cluster.this.endpoint
 }
 
-output "kubeconfig" {
-  description = "Kubeconfig file content for the EKS cluster"
-  value       = aws_eks_cluster.this.kubeconfig[0]
-  sensitive   = true
-}
 
 output "cluster_security_group_id" {
   description = "Security group ID associated with the EKS cluster"
