@@ -1,0 +1,35 @@
+output "cluster_endpoint" {
+  description = "EKS cluster endpoint"
+  value       = module.eks.cluster_endpoint
+}
+
+output "kubeconfig" {
+  description = "Kubeconfig file content for the EKS cluster"
+  value       = module.eks.kubeconfig
+  sensitive   = true
+}
+
+output "vpc_id" {
+  description = "VPC ID"
+  value       = module.vpc.vpc_id
+}
+
+output "private_subnet_ids" {
+  description = "Private subnet IDs"
+  value       = module.vpc.private_subnet_ids
+}
+
+output "public_subnet_ids" {
+  description = "Public subnet IDs"
+  value       = module.vpc.public_subnet_ids
+}
+
+output "node_group_arn" {
+  description = "EKS node group ARN"
+  value       = module.node_group.node_group_arn
+}
+
+output "node_group_role_arn" {
+  description = "IAM role ARN for the node group"
+  value       = module.node_group.node_group_role_arn
+}
