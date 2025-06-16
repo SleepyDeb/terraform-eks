@@ -1,13 +1,7 @@
-variable "backend_bucket" {
-  description = "AWS terraform backend bucket"
+variable "deployment_name" {
+  description = "Deployment name"
   type        = string
-  default     = "terraform-backend-846173919647-eu-west-1"
-}
-
-variable "backend_key" {
-  description = "AWS terraform backend object key"
-  type        = string
-  default     = "terraform-eks"
+  default     = "simple-deployment"
 }
 
 variable "region" {
@@ -19,7 +13,7 @@ variable "region" {
 variable "vpc_name" {
   description = "Name for the VPC"
   type        = string
-  default     = "eks-vpc"
+  default     = "vpc"
 }
 
 variable "vpc_cidr" {
@@ -49,7 +43,7 @@ variable "vpc_private_subnets" {
 variable "cluster_name" {
   description = "EKS cluster name"
   type        = string
-  default     = "my-eks-cluster"
+  default     = "cluster"
 }
 
 variable "cluster_version" {
@@ -61,7 +55,7 @@ variable "cluster_version" {
 variable "node_group_name" {
   description = "Name for the EKS node group"
   type        = string
-  default     = "default-node-group"
+  default     = "node-group"
 }
 
 variable "node_group_instance_types" {
@@ -92,6 +86,6 @@ variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {
-        Architecture = "Sample Architecture"
+    Architecture = "Sample Architecture"
   }
 }
