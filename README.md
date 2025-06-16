@@ -108,9 +108,3 @@ terraform apply -var-file=environments/development/terraform.tfvars
 ├── backend.hcl
 └── README.md
 ```
-
----
-
-## License
-
-Distributed under the MIT License.
