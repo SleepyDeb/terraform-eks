@@ -8,6 +8,12 @@ variable "eks_cluster_name" {
   type        = string
 }
 
+variable "eks_role_arn" {
+  description = "EKS Role Arn"
+  type        = string
+}
+
+
 variable "subnet_id" {
   description = "Subnet id to deploy the EC2 instance"
   type        = string
@@ -23,6 +29,7 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
 variable "role_name" {
   description = "EC2 instance role name"
   type        = string

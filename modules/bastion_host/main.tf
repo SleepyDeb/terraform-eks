@@ -23,7 +23,10 @@ resource "aws_instance" "default" {
   vpc_security_group_ids = [ var.security_group_id ]
   associate_public_ip_address = false
   iam_instance_profile = aws_iam_instance_profile.bastion.name
-  user_data = templatefile("${path.module}/scripts/cloud-init.yaml.tftpl", {})
+  user_data = templatefile("${path.module}/scripts/cloud-init.yaml.tftpl", {
+    eks_cluster_name = var.eks_cluster_name
+    eks_cluster_role = var.eks_role_arn
+  })
   tags = merge(var.tags, {
     name = var.host_name
   })

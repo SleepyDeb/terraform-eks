@@ -82,4 +82,5 @@ module "bastion-host" {
   security_group_id = module.security_groups.bastion_host_security_group_id
   tags = var.tags
   role_name = module.roles.bastion_role_name
+  eks_role_arn = module.roles.bastion_role_arn
 }

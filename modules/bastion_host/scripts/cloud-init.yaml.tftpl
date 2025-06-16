@@ -1,5 +1,98 @@
 #cloud-config
+#
+# This cloud-config script automates the setup of a developer environment
+# on an EC2 instance for interacting with a Kubernetes cluster. It performs
+# the following actions:
+#
+# 1. Writes a helper script to `/usr/local/bin/kubectl-app` which wraps kubectl
+#    to perform one-time configuration on first use.
+# 2. Enables and starts the AWS SSM Agent for remote management.
+# 3. Installs the kubectl binary.
+# 4. Installs the 'kube-credential-cache' tool for optimized AWS IAM authentication.
+# 5. Installs 'krew', the plugin manager for kubectl, for the 'ec2-user'.
+# 6. Configures the '.bashrc' file for 'ec2-user' with necessary PATH exports,
+#    aliases, and command completions for a smooth user experience.
 
-runcmd:  
-  - sudo systemctl enable amazon-ssm-agent
-  - sudo systemctl start amazon-ssm-agent
+# Part 1: Write the kubectl-app helper script
+# This script is a wrapper for kubectl that performs one-time setup
+# (like configuring kubeconfig and installing plugins) on its first run.
+# It expects EKS_CLUSTER_NAME and EKS_ROLE_ARN to be set in the environment
+# when a user runs it.
+write_files:
+  - path: /usr/local/bin/kubectl-app
+    permissions: '0755'
+    owner: root:root
+    content: |
+      #!/bin/bash
+      # This wrapper configures kubectl on the first run for the user executing it.
+      # It assumes that the AWS credentials and region are configured, and that
+      # the EKS_CLUSTER_NAME and EKS_ROLE_ARN environment variables are set.
+      
+      if [ ! -f "$HOME/.kube/config" ]; then
+        echo "Performing first-time kubectl setup for user $(whoami)..."
+      
+        # 1. Fetch kubeconfig from AWS EKS using the specified cluster name and role
+        aws eks update-kubeconfig --name "$EKS_CLUSTER_NAME" --role-arn "$EKS_ROLE_ARN"
+      
+        # 2. Use krew to install the 'ns' (namespace switcher) plugin
+        kubectl krew install ns
+      
+        # 3. Inject the credential cache into the new kubeconfig to optimize auth
+        kcc-injector "$HOME/.kube/config"
+      fi
+      
+      # Execute the actual kubectl command with all provided arguments
+      exec kubectl "$@"
+
+# Part 2: Run installation and configuration commands on boot
+runcmd:
+  # --- Enable and start the SSM Agent ---
+  - [ systemctl, enable, amazon-ssm-agent ]
+  - [ systemctl, start, amazon-ssm-agent ]
+
+  # --- Install kubectl ---
+  - [ curl, -o, /usr/local/bin/kubectl, "https://s3.us-west-2.amazonaws.com/amazon-eks/1.24.9/2023-01-11/bin/linux/amd64/kubectl" ]
+  - [ chmod, "+x", /usr/local/bin/kubectl ]
+
+  # --- Install kube-credential-cache ---
+  # This command fetches the tarball and pipes it to tar to extract the binaries directly
+  # into /usr/local/bin, which is in the system's PATH.
+  - [ sh, -c, "curl -sL https://github.com/ryodocx/kube-credential-cache/releases/download/v0.5.1/kube-credential-cache_0.5.1_Linux_x86_64.tar.gz | tar -xz -C /usr/local/bin kcc-cache kcc-injector" ]
+  
+  # --- Install krew (kubectl plugin manager) for the ec2-user ---
+  # This uses the official krew installation script, executed as the 'ec2-user'
+  # to ensure krew is installed in the correct home directory (~/.krew).
+  - >
+    runuser -l ec2-user -c '
+      set -e;
+      cd "$(mktemp -d)";
+      OS="$(uname | tr "[:upper:]" "[:lower:]")";
+      ARCH="$(uname -m | sed -e "s/x86_64/amd64/" -e "s/arm.*$/arm/")";
+      KREW="krew-$${OS}_$${ARCH}";
+      curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/$${KREW}.tar.gz";
+      tar zxf "$${KREW}.tar.gz";
+      ./"$${KREW}" install krew;
+    '
+
+  # --- Configure bash environment for ec2-user ---
+  # This block runs as the ec2-user to append all required configurations
+  # to the ~/.bashrc file, ensuring they are loaded on new shell sessions.
+  - >
+    runuser -l ec2-user -c '
+      {
+        echo ""
+        echo "# --- EKS Environment Variables (to be replaced by Terraform) ---"
+        echo "export EKS_CLUSTER_NAME=\"${eks_cluster_name}\""
+        echo "export EKS_ROLE_ARN=\"${eks_cluster_role}\""
+        echo ""
+        echo "# --- Custom Kubernetes & Krew Settings ---"
+        echo "# Add krew''s bin directory to the PATH"
+        echo "export PATH=\"$${HOME}/.krew/bin:$${PATH}\""
+        echo "# Create a shorter alias for kubectl"
+        echo "alias k='\''kubectl'\''"
+        echo "# Enable bash completion for kubectl"
+        echo "source <(kubectl completion bash)"
+        echo "# Enable bash completion for the '\''k'\'' alias"
+        echo "complete -F __start_kubectl k"
+      } >> ~/.bashrc
+    '

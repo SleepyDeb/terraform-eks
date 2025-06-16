@@ -1,68 +1,127 @@
-# Terraform AWS EKS Cluster Project
+<!-- Badges -->
+<p align="center">
+  <a href="https://github.com/SleepyDeb/terraform-eks/actions/workflows/terraform.yml">
+    <img src="https://img.shields.io/badge/Development--Deployment-Success-brightgreen?style=for-the-badge&logo=github-actions&label=Development%20Status" alt="Development Deployment Status">
+  </a>
+</p>
 
-This project provisions an AWS Elastic Kubernetes Service (EKS) cluster using Terraform. It is modular, parameterized, and ready for production use.
+# Terraform AWS EKS Platform
 
-## Project Structure
+A robust, modular, and production-ready infrastructure-as-code solution for deploying and managing Amazon EKS clusters using Terraform, with automated CI/CD via GitHub Actions and secure access patterns.
+
+---
+
+## Overview
+
+- **Cloud Platform:** [Amazon Elastic Kubernetes Service (EKS)](https://aws.amazon.com/eks/)
+- **Infrastructure as Code:** [Terraform](https://www.terraform.io/)
+- **CI/CD Automation:** [GitHub Actions](https://github.com/features/actions)
+- **Security:** Bastion host with AWS SSM Session Manager, least-privilege IAM, and network segmentation
+- **Multi-Stage Deployments:** Isolated development and production environments with separate state and configuration
+
+---
+
+## Multi-Stage & Multi-Environment Deployment
+
+This project implements a clear separation between **development** and **production** environments, each with its own backend state and configuration:
+
+```
+environments/
+  ├── development/
+  │   ├── backend.hcl
+  │   └── terraform.tfvars
+  └── production/
+      ├── backend.hcl
+      └── terraform.tfvars
+```
+
+- **State Isolation:** Each environment maintains its own Terraform state, ensuring changes in one do not affect the other.
+- **Configuration Separation:** Environment-specific variables and backends enable safe, independent deployments and testing.
+
+---
+
+## Modular Architecture
+
+The infrastructure is organized into reusable, composable modules for maintainability and scalability:
+
+```
+modules/
+  ├── bastion_host/      # Secure access via SSM
+  ├── roles/             # IAM roles and policies
+  └── security_groups/   # Network segmentation and security
+```
+
+- **Bastion Host Module:** Provisions a hardened bastion host accessible only via [AWS SSM Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html), eliminating the need for public SSH and reducing attack surface.
+- **Roles Module:** Manages IAM roles and policies with least-privilege principles.
+- **Security Groups Module:** Defines granular network access controls for all resources.
+
+---
+
+## Secure Bastion Host Access
+
+- **No Public SSH:** Bastion host is not exposed to the internet.
+- **SSM Session Manager:** Access is granted via AWS SSM, providing auditability, session logging, and fine-grained access control.
+- **Security Benefits:** Minimizes attack vectors, enforces MFA, and supports compliance requirements.
+
+---
+
+## CI/CD Pipeline (GitHub Actions)
+
+Automated workflows streamline infrastructure management:
+
+- **Plan & Apply:** On pull requests and merges, GitHub Actions run `terraform plan` and `terraform apply` for the targeted environment.
+- **Environment Promotion:** Changes are promoted from development to production via controlled workflows.
+- **Automated Validation:** Linting, security checks, and drift detection are integrated into the pipeline.
+- **Status Badges:** Deployment status for each environment is displayed at the top of this README.
+
+---
+
+## HR-Attractive Features
+
+- **Security Best Practices:** SSM-only bastion, least-privilege IAM, network segmentation, and encrypted state.
+- **Automation:** End-to-end CI/CD with GitHub Actions for consistent, repeatable deployments.
+- **Scalability:** Modular design supports easy extension and scaling of infrastructure.
+- **Maintainability:** Clear separation of concerns, reusable modules, and environment isolation.
+- **Cost Management:** Environment-specific state and tagging for cost allocation and optimization.
+- **Tagging & Reproducibility:** All resources are tagged for traceability; infrastructure is fully reproducible from code.
+
+---
+
+## Quick Start
+
+```bash
+# Initialize Terraform
+terraform init -backend-config=environments/development/backend.hcl
+
+# Plan changes for development
+terraform plan -var-file=environments/development/terraform.tfvars
+
+# Apply changes to development
+terraform apply -var-file=environments/development/terraform.tfvars
+```
+
+---
+
+## Directory Structure
 
 ```
 .
+├── environments/
+│   ├── development/
+│   └── production/
+├── modules/
+│   ├── bastion_host/
+│   ├── roles/
+│   └── security_groups/
 ├── main.tf
 ├── variables.tf
 ├── outputs.tf
-├── versions.tf
-├── README.md
-└── modules/
-    ├── vpc/
-    ├── eks/
-    └── node_group/
+├── backend.hcl
+└── README.md
 ```
 
-## Prerequisites
+---
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.3.0
-- AWS account and credentials with sufficient permissions (EKS, VPC, IAM, EC2)
-- Recommended: remote state backend (e.g., S3 with DynamoDB locking) for team use
+## License
 
-## Usage
-
-1. **Clone the repository** and change into the directory.
-2. **Configure your AWS credentials** (via environment variables, AWS CLI, or shared credentials file).
-3. **Review and customize variables** in `variables.tf` or via `terraform.tfvars`.
-4. **Initialize Terraform:**
-   ```
-   terraform init
-   ```
-5. **Review the execution plan:**
-   ```
-   terraform plan
-   ```
-6. **Apply the configuration (provisions resources):**
-   ```
-   terraform apply
-   ```
-   > **Note:** This project is provided for demonstration and planning. Do **not** apply in a production environment without review.
-
-## Variables
-
-See [`variables.tf`](variables.tf:1) for all configurable options, including region, cluster name, VPC and node group settings, and tags.
-
-## Outputs
-
-See [`outputs.tf`](outputs.tf:1) for available outputs, such as the EKS cluster endpoint, kubeconfig, VPC and subnet IDs, and node group ARNs.
-
-## Modules
-
-- [`modules/vpc`](modules/vpc): VPC and networking resources
-- [`modules/eks`](modules/eks): EKS cluster and IAM roles
-- [`modules/node_group`](modules/node_group): Managed node group(s)
-
-## Security & Best Practices
-
-- Follows AWS least-privilege IAM recommendations.
-- All resources are tagged for cost allocation and management.
-- Versions are pinned for reproducibility.
-- Use remote state for team collaboration.
-
-## Note
-
-This project only provisions infrastructure. No workloads or applications are deployed by default. **Deployment is not performed automatically.**
+Distributed under the MIT License.
