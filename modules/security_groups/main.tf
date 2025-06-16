@@ -57,3 +57,24 @@ resource "aws_vpc_security_group_ingress_rule" "bastion_to_node" {
     referenced_security_group_id = aws_security_group.eks_node.id
     ip_protocol = "-1"
 }
+
+resource "aws_vpc_security_group_egress_rule" "bastion_to_everywhere" {
+    security_group_id = aws_security_group.bastion_host.id
+    description = "Bastion to everywhere"
+    cidr_ipv4 = "0.0.0.0/0"
+    ip_protocol = "-1"
+}
+
+resource "aws_vpc_security_group_egress_rule" "eks_cluster_to_everywhere" {
+    security_group_id = aws_security_group.eks.id
+    description = "EKS Cluster to everywhere"
+    cidr_ipv4 = "0.0.0.0/0"
+    ip_protocol = "-1"
+}
+
+resource "aws_vpc_security_group_egress_rule" "eks_node_to_everywhere" {
+    security_group_id = aws_security_group.eks_node.id
+    description = "EKS Node to everywhere"
+    cidr_ipv4 = "0.0.0.0/0"
+    ip_protocol = "-1"
+}

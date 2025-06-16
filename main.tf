@@ -3,6 +3,12 @@ terraform {
   backend "s3" { }
 }
 
+# IAM Roles Module
+module "roles" {
+  source = "./modules/roles"
+  name   = var.deployment_name
+}
+
 provider "aws" {
   region = var.region
 }
@@ -32,7 +38,7 @@ module "eks" {
 
   cluster_name = "${var.deployment_name}-${var.cluster_name}"
   cluster_version = var.cluster_version
-
+  iam_role_arn = module.roles.eks_role_arn
   # Optional
   cluster_endpoint_public_access = false
 
@@ -51,6 +57,7 @@ module "eks" {
 
   eks_managed_node_group_defaults = {
     instance_types = var.node_group_instance_types
+    iam_role_arn = module.roles.eks_node_role_arn
   }
 
   authentication_mode = "API_AND_CONFIG_MAP"
@@ -74,4 +81,5 @@ module "bastion-host" {
   subnet_id = module.vpc.private_subnets[0]
   security_group_id = module.security_groups.bastion_host_security_group_id
   tags = var.tags
+  role_name = module.roles.bastion_role_name
 }

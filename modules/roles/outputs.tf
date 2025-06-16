@@ -20,10 +20,10 @@ output "eks_role_name" {
 
 output "eks_node_role_arn" {
   description = "ARN of the EKS node IAM role"
-  value       = aws_iam_role.eks-node.arn
+  value       = aws_iam_role.eks_node.arn
 }
 
 output "eks_node_role_name" {
   description = "Name of the EKS node IAM role"
-  value       = aws_iam_role.eks-node.name
+  value       = aws_iam_role.eks_node.name
 }

@@ -11,13 +11,19 @@ data "aws_ami" "this" {
   }
 }
 
+resource "aws_iam_instance_profile" "bastion" {
+  name = "${var.host_name}-instance-profile"
+  role = var.role_name
+}
+
 resource "aws_instance" "default" {
   ami = data.aws_ami.this.id
   instance_type = "t2.micro"
   subnet_id = var.subnet_id
   vpc_security_group_ids = [ var.security_group_id ]
   associate_public_ip_address = false
-  # user_data = replace(file("./scripts/cloud-init.yaml"), "_EKS_CLUSTER_NAME_", var.eks_cluster_name)
+  iam_instance_profile = aws_iam_instance_profile.bastion.name
+  user_data = templatefile("${path.module}/scripts/cloud-init.yaml.tftpl", {})
   tags = merge(var.tags, {
     name = var.host_name
   })

@@ -74,7 +74,7 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy" {
 }
 
 # EKS Node IAM Role
-resource "aws_iam_role" "eks-node" {
+resource "aws_iam_role" "eks_node" {
   name = "${var.name}-eks-node"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -91,16 +91,16 @@ resource "aws_iam_role" "eks-node" {
 }
 
 resource "aws_iam_role_policy_attachment" "eks_node_policy" {
-  role       = aws_iam_role["eks-node"].name
+  role       = aws_iam_role.eks_node.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
-  role       = aws_iam_role["eks-node"].name
+  role       = aws_iam_role.eks_node.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
 
 resource "aws_iam_role_policy_attachment" "eks_registry_policy" {
-  role       = aws_iam_role["eks-node"].name
+  role       = aws_iam_role.eks_node.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }

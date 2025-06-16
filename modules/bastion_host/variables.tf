@@ -23,3 +23,7 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+variable "role_name" {
+  description = "EC2 instance role name"
+  type        = string
+}
