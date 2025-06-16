@@ -76,17 +76,6 @@ Automated workflows streamline infrastructure management:
 
 ---
 
-## HR-Attractive Features
-
-- **Security Best Practices:** SSM-only bastion, least-privilege IAM, network segmentation, and encrypted state.
-- **Automation:** End-to-end CI/CD with GitHub Actions for consistent, repeatable deployments.
-- **Scalability:** Modular design supports easy extension and scaling of infrastructure.
-- **Maintainability:** Clear separation of concerns, reusable modules, and environment isolation.
-- **Cost Management:** Environment-specific state and tagging for cost allocation and optimization.
-- **Tagging & Reproducibility:** All resources are tagged for traceability; infrastructure is fully reproducible from code.
-
----
-
 ## Quick Start
 
 ```bash
